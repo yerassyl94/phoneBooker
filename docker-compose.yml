@@ -1,0 +1,31 @@
+version: '3.5'
+
+networks:
+  local:
+    name: custom_network
+
+services:
+  db:
+    image: postgres
+    restart: on-failure
+    environment:
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: phone-booker-db
+      POSTGRES_USER: qa
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U qa -d phone-booker-db" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: phone_book
+    depends_on:
+      - db
+    ports:
+      - "8080:8080"
